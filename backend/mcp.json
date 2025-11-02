@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "."]
+    },
+      "youtube": {
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-c",
+        "/home/partha/.local/bin/uv --directory /home/partha/mcp-servers/youtube-mcp run python main.py"
+      ]
+    }
+  }
+}
