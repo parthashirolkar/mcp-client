@@ -6,7 +6,7 @@ Simple script to run the MCP Client API server
 import uvicorn
 
 if __name__ == "__main__":
-    # Configure uvicorn
+    # Configure uvicorn to use our simplified implementation
     uvicorn.run(
-        "app.main:app", host="0.0.0.0", port=8000, reload=True, log_level="info"
+        "simple_main:app", host="0.0.0.0", port=8000, reload=True, log_level="info"
     )

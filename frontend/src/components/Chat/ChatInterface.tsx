@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Box,
   Paper,
@@ -448,13 +450,131 @@ const ChatInterface: React.FC = () => {
 
             <MessageContent isUser={message.role === 'user'}>
               <MessageBubble isUser={message.role === 'user'}>
-                <Typography variant="body1" component="div" sx={{ lineHeight: 1.6 }}>
-                  {message.content.split('\n').map((paragraph, index) => (
-                    <Typography key={index} sx={{ mb: paragraph.trim() === '' ? 0 : 1 }}>
-                      {paragraph}
-                    </Typography>
-                  ))}
-                </Typography>
+                {message.role === 'user' ? (
+                  // User messages render as plain text
+                  <Typography variant="body1" component="div" sx={{ lineHeight: 1.6 }}>
+                    {message.content.split('\n').map((paragraph, index) => (
+                      <Typography key={index} sx={{ mb: paragraph.trim() === '' ? 0 : 1 }}>
+                        {paragraph}
+                      </Typography>
+                    ))}
+                  </Typography>
+                ) : (
+                  // Assistant messages render as markdown
+                  <Box sx={{
+                    '& p': {
+                      m: 0,
+                      mb: 1,
+                      '&:last-child': { mb: 0 }
+                    },
+                    '& h1, h2, h3, h4, h5, h6': {
+                      mt: 2,
+                      mb: 1,
+                      fontWeight: 'bold'
+                    },
+                    '& h1': { fontSize: '1.5em' },
+                    '& h2': { fontSize: '1.3em' },
+                    '& h3': { fontSize: '1.1em' },
+                    '& ul, ol': {
+                      ml: 2,
+                      mb: 1
+                    },
+                    '& li': {
+                      mb: 0.5
+                    },
+                    '& code': {
+                      backgroundColor: 'grey.100',
+                      padding: '2px 4px',
+                      borderRadius: '4px',
+                      fontFamily: 'monospace',
+                      fontSize: '0.9em'
+                    },
+                    '& pre': {
+                      backgroundColor: 'grey.100',
+                      padding: 1,
+                      borderRadius: 1,
+                      overflow: 'auto',
+                      mb: 1,
+                      '& code': {
+                        backgroundColor: 'transparent',
+                        padding: 0
+                      }
+                    },
+                    '& blockquote': {
+                      borderLeft: '4px solid',
+                      borderColor: 'primary.main',
+                      pl: 2,
+                      ml: 0,
+                      fontStyle: 'italic',
+                      mb: 1
+                    },
+                    '& table': {
+                      borderCollapse: 'collapse',
+                      width: '100%',
+                      mb: 1
+                    },
+                    '& th, td': {
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      padding: 1,
+                      textAlign: 'left'
+                    },
+                    '& th': {
+                      backgroundColor: 'grey.50',
+                      fontWeight: 'bold'
+                    },
+                    '& a': {
+                      color: 'primary.main',
+                      textDecoration: 'none',
+                      '&:hover': {
+                        textDecoration: 'underline'
+                      }
+                    }
+                  }}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                      // @ts-ignore - ReactMarkdown component types
+                      p: ({children}: any) => <Typography variant="body1" component="div" sx={{ mb: 1, '&:last-child': { mb: 0 } }}>{children}</Typography>,
+                      // @ts-ignore - ReactMarkdown component types
+                      code: ({inline, children}: any) => {
+                        if (inline) {
+                          return <Box component="code" sx={{
+                            backgroundColor: 'grey.100',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            fontFamily: 'monospace',
+                            fontSize: '0.9em'
+                          }}>{children}</Box>
+                        }
+                        return <Box component="code" sx={{
+                          display: 'block',
+                          backgroundColor: 'grey.100',
+                          padding: 1,
+                          borderRadius: 1,
+                          overflow: 'auto',
+                          fontFamily: 'monospace',
+                          fontSize: '0.9em',
+                          whiteSpace: 'pre-wrap'
+                        }}>{children}</Box>
+                      },
+                      // @ts-ignore - ReactMarkdown component types
+                      pre: ({children}: any) => <Box component="pre" sx={{
+                        backgroundColor: 'grey.100',
+                        padding: 1,
+                        borderRadius: 1,
+                        overflow: 'auto',
+                        mb: 1,
+                        fontFamily: 'monospace',
+                        fontSize: '0.9em',
+                        margin: 0
+                      }}>{children}</Box>
+                    }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </Box>
+                )}
 
                 {message.tool_calls && message.tool_calls.length > 0 && (
                   <Box sx={{ mt: 2, pt: 2, borderTop: `1px solid ${theme.palette.divider}` }}>
@@ -532,7 +652,7 @@ const ChatInterface: React.FC = () => {
             maxRows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder="Type your message..."
             disabled={isLoading || !conversation}
             variant="outlined"
