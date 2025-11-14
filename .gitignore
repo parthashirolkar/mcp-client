@@ -165,6 +165,7 @@ uvicorn.log
 # Project specific
 /backend/test_*.py
 /backend/debug_*.py
+.playwright-mcp/
 
 # Lock files (keep package.json and pyproject.toml)
 package-lock.json
