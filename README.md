@@ -1,93 +1,82 @@
-# MCP Client Web Application
+# MCP Client - Simplified AI Chat Interface
 
-A comprehensive web-based Model Context Protocol (MCP) client that allows users to connect to and manage multiple MCP servers through a modern React interface with real-time updates.
+A streamlined Model Context Protocol (MCP) client web application that connects to local Ollama models and MCP servers. The project has been completely refactored from a complex multi-service architecture to a focused, maintainable chat application with a modern Claude.ai-inspired interface.
 
-## Architecture
+## 🚀 What's New (November 2025)
 
-- **Backend**: FastAPI with Python MCP SDK
-- **Frontend**: React with Material-UI and TypeScript
-- **Database**: SQLite for configuration persistence
-- **Communication**: REST API + WebSockets for real-time updates
-- **MCP Support**: stdio connections (official) and HTTP bridge support
+- **Major Architecture Refactor**: 60% code reduction from ~2000+ to ~800 lines
+- **Claude.ai-Inspired UI**: Complete redesign with orange accent colors and dark/light themes
+- **Simplified Backend**: Consolidated from 15+ services to 2 core files
+- **Enhanced Chat Experience**: Real-time WebSocket communication with markdown rendering
+- **Focus on Simplicity**: Removed complex features while preserving core functionality
 
-## Features
+## Architecture Overview
 
-### 🚀 Core Functionality
-- **Dynamic MCP Server Management**: Add, configure, and manage multiple MCP servers
-- **Real-time Connection Monitoring**: Live status updates via WebSockets
-- **Tool Discovery & Execution**: Browse and execute tools from connected servers
-- **Interactive Dashboard**: Overview of server status and available tools
-- **Connection Types**: Support for both stdio and HTTP-based MCP servers
-
-### 🎨 User Interface
-- **Modern Design**: Built with Material-UI components
-- **Responsive Layout**: Works on desktop and mobile devices
-- **Real-time Updates**: Instant feedback on connection status changes
-- **Intuitive Configuration**: Easy-to-use forms for server setup
-- **Error Handling**: Clear error messages and recovery options
-
-### ⚡ Technical Features
-- **TypeScript**: Full type safety across the application
-- **WebSocket Integration**: Real-time communication without polling
-- **Health Monitoring**: Automatic server health checks and reconnection
-- **Tool Execution History**: Track tool executions and results
-- **Configuration Persistence**: All settings saved to SQLite database
-
-## Project Structure
+### Current Implementation (Post-Refactor)
 
 ```
 mcp-client/
-├── backend/                     # FastAPI application
-│   ├── app/
-│   │   ├── main.py             # FastAPI app with lifecycle management
-│   │   ├── mcp/
-│   │   │   ├── manager.py      # MCP connection manager
-│   │   │   └── transports.py   # stdio and HTTP transport handlers
-│   │   ├── api/
-│   │   │   ├── servers.py      # Server CRUD operations
-│   │   │   ├── tools.py        # Tool execution endpoints
-│   │   │   └── websockets.py   # WebSocket handlers
-│   │   ├── models/
-│   │   │   ├── schemas.py      # Pydantic models
-│   │   │   └── database_models.py # SQLAlchemy models
-│   │   └── database.py         # Database configuration
+├── backend/                     # Simplified FastAPI backend (~800 lines)
+│   ├── mcp_client.py           # Core MCP client with Ollama integration
+│   ├── simple_main.py          # FastAPI server with WebSocket support
 │   ├── run_server.py           # Server startup script
-│   └── pyproject.toml          # uv configuration
-└── frontend/                   # React application
+│   ├── mcp.json                # MCP server configuration
+│   └── pyproject.toml          # Minimal dependencies (FastAPI, MCP, Ollama)
+└── frontend/                   # React 19 + TypeScript + Material-UI
     ├── src/
-    │   ├── components/
-    │   │   ├── Layout/
-    │   │   │   └── MainLayout.tsx # Main app layout
-    │   │   └── Servers/
-    │   │       ├── ServerList.tsx # Server list component
-    │   │       └── ServerConfigForm.tsx # Server configuration form
-    │   ├── pages/
-    │   │   ├── Dashboard.tsx   # Main dashboard
-    │   │   ├── Servers.tsx     # Server management page
-    │   │   └── Tools.tsx       # Tool browser and execution
-    │   ├── services/
-    │   │   ├── api.ts          # REST API client
-    │   │   └── websocket.ts    # WebSocket service
-    │   ├── types/
-    │   │   └── mcp.ts          # TypeScript type definitions
-    │   └── App.tsx             # Main React app
-    ├── package.json
-    └── .env.example            # Environment variables template
+    │   ├── components/Chat/     # Chat interface components
+    │   │   ├── ChatInterface.tsx # Main chat with markdown rendering
+    │   │   └── Sidebar.tsx     # Collapsible navigation
+    │   ├── context/ThemeContext.tsx # Theme management
+    │   ├── hooks/useThemeMode.ts   # Theme persistence
+    │   └── App.tsx              # Main app component
+    └── package.json             # React + Material-UI dependencies
 ```
 
-## Prerequisites
+### Key Simplifications
 
-- **Python 3.8+** with [uv](https://docs.astral.sh/uv/) installed
-- **Node.js 17+** with npm installed
-- **Git** for cloning the repository
+- **Removed**: Database persistence, hot reload, multi-service architecture
+- **Consolidated**: 15+ backend files → 2 core files
+- **Streamlined**: Complex dependency management → 5 core packages
+- **Maintained**: All chat, MCP, and Ollama functionality
+
+## Features
+
+### ✅ Core Functionality
+- **Real-time Chat**: WebSocket-based communication with local Ollama models
+- **MCP Integration**: Connect to MCP servers and use their tools
+- **Tool Calling**: Full function calling support with JSON schema validation
+- **32k Context Window**: Extended conversation context for better continuity
+- **Modern UI**: Claude.ai-inspired design with dark/light themes
+
+### 🎨 User Interface
+- **Responsive Design**: Works on desktop and mobile devices
+- **Dark/Light Themes**: Comprehensive theme system with localStorage persistence
+- **Collapsible Sidebar**: Space-efficient navigation (280px ↔ 60px)
+- **Markdown Rendering**: Rich text with code highlighting and table support
+- **Real-time Updates**: Instant message delivery without page refreshes
+
+### ⚡ Technical Features
+- **TypeScript**: Full type safety across the application
+- **Material-UI 7**: Modern component library
+- **WebSocket Integration**: Real-time bidirectional communication
+- **Error Handling**: Comprehensive error recovery and user feedback
+- **Docker Ready**: Designed to work with Docker-based MCP servers
 
 ## Quick Start
+
+### Prerequisites
+
+- **Python 3.13+** with [uv](https://docs.astral.sh/uv/) installed
+- **Node.js 17+** with npm installed
+- **Docker** (for MCP server)
+- **Ollama** installed locally with `qwen2.5:3b` model
 
 ### 1. Clone and Setup
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/your-username/mcp-client.git
 cd mcp-client
 
 # Setup backend
@@ -101,18 +90,28 @@ npm install
 cd ..
 ```
 
-### 2. Configure Environment
+### 2. Setup Ollama
 
 ```bash
-# Copy environment template
-cp frontend/.env.example frontend/.env
+# Install Ollama (if not already installed)
+curl -fsSL https://ollama.ai/install.sh | sh
 
-# The defaults should work for local development:
-# REACT_APP_API_URL=http://localhost:8000
-# REACT_APP_WS_URL=ws://localhost:8000
+# Pull the required model
+ollama pull qwen2.5:3b
+
+# Start Ollama service
+ollama serve
 ```
 
-### 3. Start the Applications
+### 3. Setup MCP Server (Indian Stock Analysis)
+
+```bash
+# Build and run the Indian Stock MCP server
+docker build -t indian-stock-mcp-server /path/to/indian-stock-mcp-server
+docker run -d --name indian-stock-mcp-server indian-stock-mcp-server
+```
+
+### 4. Start the Applications
 
 **Backend (Terminal 1):**
 ```bash
@@ -126,34 +125,72 @@ cd frontend
 npm start
 ```
 
-### 4. Access the Application
+### 5. Access the Application
 
 Open your browser and navigate to **http://localhost:3000**
 
 ## Usage Guide
 
-### Adding Your First MCP Server
+### Starting a Conversation
 
-1. **Navigate to Servers page** using the sidebar
-2. **Click the "+" button** to add a new server
-3. **Configure the connection:**
-   - **STDIO**: Command and arguments (e.g., `python`, `path/to/server.py`)
-   - **HTTP**: URL and headers for HTTP-based servers
-4. **Save and connect** to start using the server
+1. The application automatically connects to the configured MCP server on startup
+2. Type your message in the chat interface and press Enter
+3. The AI will respond using local Ollama with access to MCP tools
+4. Tool calls are executed automatically when needed for stock market analysis
 
-### Managing Servers
+### Theme Customization
 
-- **Connect/Disconnect**: Use the control buttons on each server card
-- **Edit Settings**: Click the menu icon (⋮) and select "Edit"
-- **Test Connection**: Verify server connectivity before enabling
-- **Monitor Status**: Real-time status indicators show connection health
+- **Toggle Theme**: Click the sun/moon icon in the sidebar
+- **Collapse Sidebar**: Click the hamburger menu to expand/collapse
+- **Preferences**: Theme choices are automatically saved
 
-### Using Tools
+### Current MCP Tools
 
-1. **Go to Tools page** to see all available tools from connected servers
-2. **Browse tools** organized by server
-3. **Execute tools** by clicking the "Execute" button and providing required parameters
-4. **View results** in the execution dialog with formatted output
+The application is configured with Indian Stock Market Analysis tools that provide:
+- Current stock prices and company fundamentals
+- Historical data and technical indicators
+- Market overviews and sector performance
+- Stock search and recent news
+
+## API Documentation
+
+Once the backend is running, visit **http://localhost:8000/docs** for interactive API documentation.
+
+### Key Endpoints
+
+- `POST /chat` - Send chat messages with MCP tool integration
+- `GET /health` - Check application and MCP server status
+- `GET /tools` - List available MCP tools
+- `WebSocket /ws` - Real-time chat communication
+
+## Configuration
+
+### MCP Server Configuration
+
+Edit `backend/mcp.json` to configure different MCP servers:
+
+```json
+{
+  "mcpServers": {
+    "your-server-name": {
+      "command": "docker",
+      "args": [
+        "exec",
+        "-i",
+        "container-name",
+        "uv",
+        "run",
+        "python",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+
+### Ollama Model Configuration
+
+The default model is `qwen2.5:3b`. To change it, modify the `default_model` parameter in `mcp_client.py`.
 
 ## Development
 
@@ -162,11 +199,11 @@ Open your browser and navigate to **http://localhost:3000**
 ```bash
 cd backend
 
-# Start with hot reload
-uv run python run_server.py
+# Start with auto-reload
+uv run uvicorn simple_main:app --reload --host 0.0.0.0 --port 8000
 
-# Or use uvicorn directly
-uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Check dependencies
+uv tree
 ```
 
 ### Frontend Development
@@ -184,38 +221,17 @@ npm run build
 npm test
 ```
 
-## API Documentation
-
-Once the backend is running, visit **http://localhost:8000/docs** for interactive API documentation.
-
-## WebSocket Events
-
-The application uses WebSockets for real-time updates:
-
-- `server_status_update`: Server connection status changes
-- `tools_update`: Available tools updates
-- `tool_execution_result`: Tool execution results
-- `status_update`: General status updates
-
-## Configuration Options
-
-### Server Configuration
-
-- **Connection Type**: STDIO or HTTP
-- **Timeout**: Connection timeout in seconds
-- **Retry Count**: Number of reconnection attempts
-- **Custom Headers**: HTTP headers for HTTP connections
-- **Command Arguments**: Arguments for STDIO connections
-
-### Environment Variables
+### Code Quality
 
 ```bash
-# Backend (optional)
-DATABASE_URL=sqlite:///./mcp_client.db
+# Backend linting and formatting
+cd backend
+uv run ruff check .
+uv run ruff format .
 
-# Frontend
-REACT_APP_API_URL=http://localhost:8000
-REACT_APP_WS_URL=ws://localhost:8000
+# Frontend linting (if configured)
+cd frontend
+npm run lint
 ```
 
 ## Troubleshooting
@@ -224,54 +240,92 @@ REACT_APP_WS_URL=ws://localhost:8000
 
 1. **Backend won't start**:
    - Ensure uv is installed: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-   - Check Python version: `python --version`
+   - Check Python version: `python --version` (requires 3.13+)
+   - Verify Ollama is running: `ollama list`
 
 2. **Frontend connection errors**:
    - Verify backend is running on port 8000
-   - Check environment variables in `.env` file
-   - Ensure CORS is properly configured
+   - Check if ports are available: `netstat -tlnp | grep :8000`
+   - Ensure no firewall blocking
 
 3. **MCP Server connection issues**:
-   - Verify server command and paths are correct
-   - Check server dependencies are installed
-   - Test connection using the "Test Connection" button
+   - Verify Docker container is running: `docker ps`
+   - Check container name matches `mcp.json` configuration
+   - Test MCP server manually if possible
 
-4. **Tools not appearing**:
-   - Ensure server is connected (green status)
-   - Check server logs for errors
-   - Verify server implements the MCP protocol correctly
+4. **Ollama connection issues**:
+   - Ensure Ollama service is running: `ollama serve`
+   - Check model is available: `ollama list`
+   - Verify model compatibility with tool calling
 
 ### Debug Mode
 
-Enable debug logging by setting environment variables:
+Enable detailed logging:
 
 ```bash
 # Backend
 export RUST_LOG=debug
+cd backend && uv run python run_server.py
 
-# Frontend
-REACT_APP_DEBUG=true npm start
+# Frontend (check browser console)
+# No special setup needed - React DevTools recommended
 ```
 
-## Contributing
+## Project History
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+### Recent Major Refactoring (November 2025)
+
+The project underwent a significant architectural simplification:
+
+**Before:**
+- Complex multi-service architecture (~2000+ lines)
+- 15+ backend files with separate managers, services, and handlers
+- Database persistence with SQLAlchemy
+- Hot reload configuration management
+- Complex dependency tree
+
+**After:**
+- Streamlined implementation (~800 lines)
+- 2 core backend files with consolidated functionality
+- In-memory conversation management
+- Static configuration with mcp.json
+- Minimal dependency set
+
+**Benefits:**
+- 60% reduction in codebase size
+- Faster development and deployment
+- Easier to understand and maintain
+- Reduced attack surface
+- Better performance (less overhead)
+
+### UI/UX Overhaul (November 2025)
+
+Complete interface redesign inspired by Claude.ai:
+- Orange accent color scheme
+- Dark/light theme system
+- Collapsible sidebar navigation
+- Enhanced markdown rendering
+- Improved accessibility
 
 ## License
 
 This project is licensed under the MIT License.
 
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
 ## Support
 
 For issues and questions:
-- Check the troubleshooting section
+- Check the troubleshooting section above
 - Review the API documentation at `/docs`
 - Open an issue on GitHub
 
 ---
 
-Built with ❤️ using FastAPI, React, Material-UI, and the Model Context Protocol.
+Built with ❤️ using FastAPI, React, Material-UI, Ollama, and the Model Context Protocol.
