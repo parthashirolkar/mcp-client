@@ -94,13 +94,29 @@ const ChatContainer = styled(Paper)(({ theme }) => ({
 }));
 
 const ChatHeader = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(3),
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  backgroundColor: theme.palette.background.paper,
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+  padding: theme.spacing(3, 3.5),
+  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+  background: theme.palette.mode === 'dark'
+    ? 'linear-gradient(135deg, rgba(10, 10, 20, 0.95) 0%, rgba(15, 15, 25, 0.98) 100%)'
+    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 251, 252, 0.99) 100%)',
+  backdropFilter: 'blur(20px)',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 4px 20px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)'
+    : '0 4px 20px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06)',
   position: 'sticky',
   top: 0,
   zIndex: 10,
+  transition: 'all 0.3s ease-in-out',
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '1px',
+    background: 'linear-gradient(90deg, transparent, rgba(249,115,22,0.3), transparent)',
+    opacity: 0.6,
+  },
 }));
 
 const MessagesContainer = styled(Box)(({ theme }) => ({
@@ -130,38 +146,76 @@ const MessageWrapper = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isUser'
 })<{ isUser: boolean }>(({ theme, isUser }) => ({
   display: 'flex',
-  gap: theme.spacing(1.5),
+  gap: theme.spacing(2),
   alignItems: 'flex-start',
   justifyContent: isUser ? 'flex-end' : 'flex-start',
-  animation: 'messageSlideIn 0.3s ease-out',
+  animation: 'messageSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
   '@keyframes messageSlideIn': {
     from: {
       opacity: 0,
-      transform: 'translateY(10px)',
+      transform: isUser ? 'translateY(20px) translateX(20px)' : 'translateY(20px) translateX(-20px)',
+      filter: 'blur(4px)',
     },
     to: {
       opacity: 1,
-      transform: 'translateY(0)',
+      transform: 'translateY(0) translateX(0)',
+      filter: 'blur(0)',
     },
   },
+  '&:hover [class*="MessageAvatar"]': {
+    transform: 'scale(1.05) rotate(5deg)',
+  },
+  '&:hover [class*="MessageBubble"]': {
+    transform: 'translateY(-1px)',
+  },
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
 }));
 
 const MessageAvatar = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isUser'
 })<{ isUser: boolean }>(({ theme, isUser }) => ({
-  width: 36,
-  height: 36,
+  width: 40,
+  height: 40,
   borderRadius: '50%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: isUser
-    ? theme.palette.primary.main
-    : theme.palette.secondary.main,
-  color: theme.palette.primary.contrastText,
+  background: isUser
+    ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)'
+    : theme.palette.mode === 'dark'
+    ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'
+    : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+  color: '#ffffff',
   fontSize: '1rem',
-  fontWeight: 600,
+  fontWeight: 700,
   flexShrink: 0,
+  boxShadow: isUser
+    ? '0 4px 12px rgba(249, 115, 22, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)'
+    : '0 4px 12px rgba(99, 102, 241, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1)',
+  border: '2px solid rgba(255, 255, 255, 0.2)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 60%)',
+    opacity: 0.4,
+  },
+  '&:hover': {
+    transform: 'scale(1.05) rotate(5deg)',
+    boxShadow: isUser
+      ? '0 6px 20px rgba(249, 115, 22, 0.4), 0 3px 8px rgba(0, 0, 0, 0.15)'
+      : '0 6px 20px rgba(99, 102, 241, 0.4), 0 3px 8px rgba(0, 0, 0, 0.15)',
+  },
+  '& .MuiSvgIcon-root': {
+    fontSize: '1.2rem',
+    transition: 'all 0.3s ease-in-out',
+  },
 }));
 
 const MessageContent = styled(Box, {
@@ -174,34 +228,56 @@ const MessageContent = styled(Box, {
 const MessageBubble = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isUser'
 })<{ isUser: boolean }>(({ theme, isUser }) => ({
-  padding: theme.spacing(2, 2.5),
-  borderRadius: theme.spacing(2),
+  padding: theme.spacing(2.5, 3),
+  borderRadius: theme.spacing(3),
   background: isUser
-    ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)'
+    ? 'linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%)'
     : theme.palette.mode === 'dark'
-    ? 'linear-gradient(135deg, rgba(30,30,30,0.95) 0%, rgba(20,20,20,0.95) 100%)'
-    : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+    ? 'linear-gradient(135deg, rgba(15, 15, 25, 0.95) 0%, rgba(10, 10, 20, 0.95) 100%)'
+    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 251, 252, 0.98) 100%)',
   color: isUser
     ? '#ffffff'
     : theme.palette.mode === 'dark'
-    ? '#e5e7eb'
-    : '#1f2937',
+    ? '#f8fafc'
+    : '#1a1f2e',
   boxShadow: isUser
-    ? '0 4px 12px rgba(249, 115, 22, 0.25)'
+    ? '0 8px 24px rgba(249, 115, 22, 0.35), 0 2px 8px rgba(249, 115, 22, 0.2)'
     : theme.palette.mode === 'dark'
-    ? '0 2px 8px rgba(0, 0, 0, 0.3)'
-    : '0 2px 8px rgba(0, 0, 0, 0.06)',
-  border: isUser ? 'none' : `1px solid ${theme.palette.divider}`,
+    ? '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3)'
+    : '0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06)',
+  border: isUser ? '1px solid rgba(255, 255, 255, 0.2)' : `1px solid ${theme.palette.divider}`,
   position: 'relative',
-  transition: 'all 0.2s ease',
-  backdropFilter: 'blur(10px)',
-  '&:hover': {
-    transform: 'translateY(-1px)',
-    boxShadow: isUser
-      ? '0 6px 16px rgba(249, 115, 22, 0.3)'
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  backdropFilter: 'blur(20px)',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: isUser
+      ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)'
       : theme.palette.mode === 'dark'
-      ? '0 4px 12px rgba(0, 0, 0, 0.4)'
-      : '0 4px 12px rgba(0, 0, 0, 0.1)',
+      ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'
+      : 'linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)',
+  },
+  '&:hover': {
+    transform: 'translateY(-3px) scale(1.02)',
+    boxShadow: isUser
+      ? '0 16px 40px rgba(249, 115, 22, 0.5), 0 6px 20px rgba(249, 115, 22, 0.35)'
+      : theme.palette.mode === 'dark'
+      ? '0 16px 56px rgba(0, 0, 0, 0.6), 0 6px 20px rgba(0, 0, 0, 0.5)'
+      : '0 16px 56px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.15)',
+    '&::before': {
+      height: '3px',
+      background: isUser
+        ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)'
+        : theme.palette.mode === 'dark'
+        ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)'
+        : 'linear-gradient(90deg, transparent, rgba(0,0,0,0.2), transparent)',
+    },
   },
   // Enhanced markdown styling inside bubbles
   '& .markdown-content': {
@@ -284,15 +360,26 @@ const MessageTimestamp = styled(Typography)(({ theme }) => ({
 }));
 
 const InputContainer = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2.5, 3),
-  borderTop: `1px solid ${theme.palette.divider}`,
+  padding: theme.spacing(3, 3.5),
+  borderTop: '1px solid rgba(255, 255, 255, 0.1)',
   background: theme.palette.mode === 'dark'
-    ? `linear-gradient(180deg, ${theme.palette.background.paper} 0%, rgba(20,20,20,0.95) 100%)`
-    : `linear-gradient(180deg, ${theme.palette.background.paper} 0%, rgba(248,250,252,0.95) 100%)`,
-  backdropFilter: 'blur(10px)',
+    ? 'linear-gradient(180deg, rgba(10, 10, 20, 0.95) 0%, rgba(15, 15, 25, 0.98) 100%)'
+    : 'linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 251, 252, 0.99) 100%)',
+  backdropFilter: 'blur(20px)',
   boxShadow: theme.palette.mode === 'dark'
-    ? '0 -2px 10px rgba(0, 0, 0, 0.3)'
-    : '0 -2px 10px rgba(0, 0, 0, 0.05)',
+    ? '0 -4px 20px rgba(0, 0, 0, 0.4), 0 -2px 8px rgba(0, 0, 0, 0.3)'
+    : '0 -4px 20px rgba(0, 0, 0, 0.15), 0 -2px 8px rgba(0, 0, 0, 0.08)',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '1px',
+    background: 'linear-gradient(90deg, transparent, rgba(249,115,22,0.3), transparent)',
+    opacity: 0.6,
+  },
 }));
 
 const InputWrapper = styled(Box)(({ theme }) => ({
@@ -303,46 +390,114 @@ const InputWrapper = styled(Box)(({ theme }) => ({
 }));
 
 const SendButton = styled(IconButton)<{ disabled?: boolean }>(({ theme, disabled }) => ({
-  width: 48,
-  height: 48,
+  width: 52,
+  height: 52,
   borderRadius: '50%',
   background: disabled
-    ? theme.palette.action.disabled
-    : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+    ? 'linear-gradient(135deg, rgba(156, 163, 175, 0.3) 0%, rgba(107, 114, 128, 0.3) 100%)'
+    : 'linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%)',
   boxShadow: disabled
-    ? 'none'
-    : '0 4px 12px rgba(249, 115, 22, 0.3)',
-  transition: 'all 0.2s ease-in-out',
+    ? '0 2px 4px rgba(0, 0, 0, 0.1)'
+    : '0 6px 20px rgba(249, 115, 22, 0.4), 0 2px 8px rgba(249, 115, 22, 0.3)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  border: disabled ? '1px solid rgba(156, 163, 175, 0.2)' : '1px solid rgba(249, 115, 22, 0.3)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: disabled
+      ? 'none'
+      : 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 60%)',
+    opacity: 0.4,
+  },
   '&:hover:not(:disabled)': {
-    background: 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)',
-    transform: 'scale(1.05)',
-    boxShadow: '0 6px 16px rgba(249, 115, 22, 0.4)',
+    background: 'linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%)',
+    transform: 'scale(1.08) rotate(15deg)',
+    boxShadow: '0 8px 25px rgba(249, 115, 22, 0.5), 0 4px 16px rgba(249, 115, 22, 0.4)',
+    border: '1px solid rgba(249, 115, 22, 0.5)',
+    '&::before': {
+      opacity: 0.6,
+    },
   },
   '&:active:not(:disabled)': {
     transform: 'scale(0.95)',
+    boxShadow: '0 4px 12px rgba(249, 115, 22, 0.3), 0 1px 4px rgba(249, 115, 22, 0.2)',
+  },
+  '& .MuiSvgIcon-root': {
+    color: disabled ? 'rgba(255, 255, 255, 0.6)' : '#ffffff',
+    fontSize: '1.4rem',
+    transition: 'all 0.3s ease-in-out',
+    filter: disabled ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2))',
   },
 }));
 
 const ToolCallChip = styled(Chip)(({ theme }) => ({
-  margin: theme.spacing(0.25, 0.5),
-  fontSize: '0.7rem',
+  margin: theme.spacing(0.5, 0.75),
+  fontSize: '0.75rem',
   height: 'auto',
-  padding: theme.spacing(0.5, 1),
-  backgroundColor: theme.palette.info.light,
-  color: theme.palette.info.main,
-  border: `1px solid ${theme.palette.info.main}`,
+  padding: theme.spacing(0.75, 1.25),
+  fontWeight: 600,
+  background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%)',
+  color: '#6366f1',
+  border: '1px solid rgba(99, 102, 241, 0.3)',
+  borderRadius: theme.spacing(2),
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  backdropFilter: 'blur(10px)',
+  '&:hover': {
+    background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%)',
+    transform: 'scale(1.05) translateY(-1px)',
+    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)',
+    border: '1px solid rgba(99, 102, 241, 0.4)',
+  },
   '& .MuiChip-icon': {
-    color: theme.palette.info.main,
-    fontSize: '0.875rem',
+    color: '#6366f1',
+    fontSize: '1rem',
+    '&:hover': {
+      transform: 'rotate(15deg)',
+    },
+  },
+  '& .MuiChip-label': {
+    fontWeight: 600,
+    letterSpacing: '0.025em',
   },
 }));
 
 const ToolResultContainer = styled(Box)(({ theme }) => ({
-  marginTop: theme.spacing(1.5),
-  padding: theme.spacing(1.5),
-  backgroundColor: theme.palette.grey[50],
-  borderRadius: theme.spacing(1.5),
-  border: `1px solid ${theme.palette.divider}`,
+  marginTop: theme.spacing(2),
+  padding: theme.spacing(2),
+  background: theme.palette.mode === 'dark'
+    ? 'linear-gradient(135deg, rgba(15, 15, 25, 0.9) 0%, rgba(10, 10, 20, 0.9) 100%)'
+    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 251, 252, 0.95) 100%)',
+  borderRadius: theme.spacing(2.5),
+  border: '1px solid rgba(99, 102, 241, 0.2)',
+  backdropFilter: 'blur(20px)',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)'
+    : '0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: 'linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), transparent)',
+  },
+  '&:hover': {
+    transform: 'translateY(-1px)',
+    boxShadow: theme.palette.mode === 'dark'
+      ? '0 8px 32px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3)'
+      : '0 8px 32px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1)',
+    border: '1px solid rgba(99, 102, 241, 0.3)',
+  },
 }));
 
 const LoadingBubble = styled(Box)(({ theme }) => ({
@@ -591,13 +746,26 @@ const ChatInterface: React.FC = () => {
             <IconButton
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 2,
-                transition: 'all 0.2s ease-in-out',
+                width: 44,
+                height: 44,
+                borderRadius: 2.5,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                background: 'linear-gradient(135deg, rgba(249,115,22,0.1) 0%, rgba(249,115,22,0.05) 100%)',
+                border: '1px solid rgba(249,115,22,0.2)',
                 '&:hover': {
-                  backgroundColor: 'action.hover',
-                  transform: 'scale(1.05)',
+                  background: 'linear-gradient(135deg, rgba(249,115,22,0.2) 0%, rgba(249,115,22,0.1) 100%)',
+                  transform: 'scale(1.05) rotate(5deg)',
+                  boxShadow: '0 4px 12px rgba(249,115,22,0.2)',
+                  border: '1px solid rgba(249,115,22,0.3)',
+                  '& .MuiSvgIcon-root': {
+                    color: '#f97316',
+                    transform: 'rotate(180deg)',
+                  },
+                },
+                '& .MuiSvgIcon-root': {
+                  color: theme.palette.text.secondary,
+                  fontSize: '1.2rem',
+                  transition: 'all 0.3s ease-in-out',
                 },
               }}
               title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -617,13 +785,36 @@ const ChatInterface: React.FC = () => {
             <IconButton
               onClick={toggleMode}
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: 2,
-                transition: 'all 0.2s ease-in-out',
+                width: 44,
+                height: 44,
+                borderRadius: 2.5,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                background: theme.palette.mode === 'dark'
+                  ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%)'
+                  : 'linear-gradient(135deg, rgba(30, 64, 175, 0.1) 0%, rgba(30, 64, 175, 0.05) 100%)',
+                border: theme.palette.mode === 'dark'
+                  ? '1px solid rgba(251, 191, 36, 0.2)'
+                  : '1px solid rgba(30, 64, 175, 0.2)',
                 '&:hover': {
-                  backgroundColor: 'action.hover',
-                  transform: 'scale(1.05)',
+                  background: theme.palette.mode === 'dark'
+                    ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(251, 191, 36, 0.1) 100%)'
+                    : 'linear-gradient(135deg, rgba(30, 64, 175, 0.2) 0%, rgba(30, 64, 175, 0.1) 100%)',
+                  transform: 'scale(1.05) rotate(15deg)',
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 4px 12px rgba(251, 191, 36, 0.2)'
+                    : '0 4px 12px rgba(30, 64, 175, 0.2)',
+                  border: theme.palette.mode === 'dark'
+                    ? '1px solid rgba(251, 191, 36, 0.3)'
+                    : '1px solid rgba(30, 64, 175, 0.3)',
+                  '& .MuiSvgIcon-root': {
+                    color: theme.palette.mode === 'dark' ? '#fbbf24' : '#1e40af',
+                    transform: 'rotate(360deg)',
+                  },
+                },
+                '& .MuiSvgIcon-root': {
+                  color: theme.palette.mode === 'dark' ? '#fbbf24' : '#1e40af',
+                  fontSize: '1.2rem',
+                  transition: 'all 0.3s ease-in-out',
                 },
               }}
               title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -811,17 +1002,46 @@ const ChatInterface: React.FC = () => {
             size="medium"
             sx={{
               '& .MuiOutlinedInput-root': {
-                borderRadius: 2.5,
-                backgroundColor: 'background.paper',
+                borderRadius: 3,
+                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 '& fieldset': {
-                  borderColor: 'divider',
+                  borderColor: 'transparent',
+                  transition: 'all 0.3s ease-in-out',
                 },
-                '&:hover fieldset': {
-                  borderColor: 'primary.main',
+                '&:hover': {
+                  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.95)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(249, 115, 22, 0.3)',
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'primary.main',
-                  borderWidth: 2,
+                '&.Mui-focused': {
+                  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.95)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 0 0 4px rgba(249, 115, 22, 0.15), 0 4px 20px rgba(0, 0, 0, 0.15)',
+                  border: '1px solid rgba(249, 115, 22, 0.4)',
+                  '& fieldset': {
+                    borderColor: 'transparent',
+                  },
+                },
+                '& .MuiOutlinedInput-input': {
+                  padding: '16px 20px',
+                  fontSize: '0.95rem',
+                  lineHeight: 1.5,
+                  color: theme.palette.text.primary,
+                  '&::placeholder': {
+                    color: theme.palette.text.secondary,
+                    opacity: 0.8,
+                  },
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: theme.palette.text.secondary,
+                fontWeight: 500,
+                '&.Mui-focused': {
+                  color: '#f97316',
                 },
               },
             }}

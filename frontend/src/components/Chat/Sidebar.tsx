@@ -61,31 +61,63 @@ const SidebarHeader = styled(Box, {
 const ConversationItem = styled(ListItemButton, {
   shouldForwardProp: (prop) => prop !== 'active'
 })<{ active?: boolean }>(({ theme, active }) => ({
-  borderRadius: theme.spacing(1.5),
-  margin: theme.spacing(0.5, 1.5),
-  padding: theme.spacing(1.5),
-  transition: 'all 0.2s ease-in-out',
-  backgroundColor: active ? 'rgba(249,115,22,0.1)' : 'transparent',
-  border: active ? `1px solid rgba(249,115,22,0.2)` : '1px solid transparent',
+  borderRadius: theme.spacing(2),
+  margin: theme.spacing(0.75, 1.5),
+  padding: theme.spacing(1.5, 2),
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  backgroundColor: active ? 'rgba(249,115,22,0.15)' : 'transparent',
+  border: active ? `1px solid rgba(249,115,22,0.3)` : '1px solid transparent',
+  backdropFilter: active ? 'blur(10px)' : 'none',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: active ? 'linear-gradient(135deg, rgba(249,115,22,0.1) 0%, rgba(249,115,22,0.05) 100%)' : 'none',
+    borderRadius: 'inherit',
+    opacity: active ? 1 : 0,
+    transition: 'opacity 0.3s ease-in-out',
+  },
   '&:hover': {
-    backgroundColor: active ? 'rgba(249,115,22,0.15)' : 'rgba(0,0,0,0.04)',
-    transform: 'translateX(2px)',
+    backgroundColor: active ? 'rgba(249,115,22,0.2)' : 'rgba(249,115,22,0.08)',
+    transform: 'translateX(4px) scale(1.01)',
+    boxShadow: active ? '0 4px 16px rgba(249,115,22,0.25)' : '0 2px 8px rgba(0,0,0,0.1)',
+    border: active ? `1px solid rgba(249,115,22,0.4)` : '1px solid rgba(249,115,22,0.2)',
+    '&::before': {
+      opacity: 1,
+    },
+  },
+  '&:active': {
+    transform: active ? 'translateX(2px) scale(0.99)' : 'translateX(2px) scale(0.99)',
   },
 }));
 
 const NewChatButton = styled(IconButton, {
   shouldForwardProp: (prop) => prop !== 'collapsed'
 })<{ collapsed?: boolean }>(({ theme, collapsed }) => ({
-  width: collapsed ? 36 : 48,
-  height: collapsed ? 36 : 48,
-  background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-  boxShadow: collapsed ? '0 2px 8px rgba(249,115,22,0.25)' : '0 4px 12px rgba(249,115,22,0.3)',
+  width: collapsed ? 40 : 52,
+  height: collapsed ? 40 : 52,
+  background: 'linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%)',
+  boxShadow: collapsed ? '0 4px 12px rgba(249,115,22,0.3)' : '0 6px 20px rgba(249,115,22,0.4)',
+  border: '1px solid rgba(249,115,22,0.2)',
   '&:hover': {
-    background: 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)',
-    transform: 'scale(1.05)',
-    boxShadow: collapsed ? '0 4px 12px rgba(249,115,22,0.35)' : '0 6px 16px rgba(249,115,22,0.4)',
+    background: 'linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%)',
+    transform: 'scale(1.08) rotate(90deg)',
+    boxShadow: collapsed ? '0 6px 20px rgba(249,115,22,0.45)' : '0 8px 25px rgba(249,115,22,0.5)',
+    border: '1px solid rgba(249,115,22,0.4)',
   },
-  transition: 'all 0.2s ease-in-out',
+  '&:active': {
+    transform: 'scale(0.95)',
+  },
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  '& .MuiSvgIcon-root': {
+    color: 'white',
+    fontSize: collapsed ? '1.2rem' : '1.4rem',
+    transition: 'all 0.3s ease-in-out',
+  },
 }));
 
 interface Conversation {
@@ -161,35 +193,75 @@ const Sidebar: React.FC<SidebarProps> = ({
     <SidebarContainer elevation={0} collapsed={isCollapsed}>
       {/* Header */}
       <SidebarHeader collapsed={isCollapsed}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', mb: isCollapsed ? 1 : 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, justifyContent: isCollapsed ? 'center' : 'flex-start', width: '100%' }}>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: isCollapsed ? 'center' : 'space-between',
+          mb: isCollapsed ? 2 : 2,
+          width: '100%'
+        }}>
+          {isCollapsed ? (
             <Avatar sx={{
-              width: isCollapsed ? 32 : 36,
-              height: isCollapsed ? 32 : 36,
-              bgcolor: 'primary.main',
-              fontSize: isCollapsed ? '0.8rem' : '1rem',
-              flexShrink: 0
+              width: 32,
+              height: 32,
+              background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              flexShrink: 0,
+              boxShadow: '0 4px 12px rgba(249,115,22,0.3)',
+              border: '2px solid rgba(255,255,255,0.1)',
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                boxShadow: '0 6px 16px rgba(249,115,22,0.4)',
+              }
             }}>
               AI
             </Avatar>
-            {!isCollapsed && (
-              <>
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.1rem', lineHeight: 1.2 }}>
-                    AI Assistant
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', lineHeight: 1 }}>
-                    {conversations.length} conversations
-                  </Typography>
-                </Box>
-                <Tooltip title="New Chat">
-                  <NewChatButton onClick={onNewChat} collapsed={isCollapsed}>
-                    <AddIcon />
-                  </NewChatButton>
-                </Tooltip>
-              </>
-            )}
-          </Box>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
+              <Avatar sx={{
+                width: 40,
+                height: 40,
+                background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                fontSize: '1rem',
+                fontWeight: 700,
+                flexShrink: 0,
+                boxShadow: '0 4px 12px rgba(249,115,22,0.3)',
+                border: '2px solid rgba(255,255,255,0.1)',
+                transition: 'all 0.3s ease-in-out',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 6px 16px rgba(249,115,22,0.4)',
+                }
+              }}>
+                AI
+              </Avatar>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 600,
+                  fontSize: '1.1rem',
+                  lineHeight: 1.2,
+                  color: 'text.primary',
+                  mb: 0.25
+                }}>
+                  AI Assistant
+                </Typography>
+                <Typography variant="caption" sx={{
+                  color: 'text.secondary',
+                  lineHeight: 1,
+                  display: 'block'
+                }}>
+                  {conversations.length} conversations
+                </Typography>
+              </Box>
+              <Tooltip title="New Chat">
+                <NewChatButton onClick={onNewChat} collapsed={isCollapsed}>
+                  <AddIcon />
+                </NewChatButton>
+              </Tooltip>
+            </Box>
+          )}
         </Box>
 
         {/* Search - only show when expanded */}
@@ -239,21 +311,82 @@ const Sidebar: React.FC<SidebarProps> = ({
       </SidebarHeader>
 
       {/* Navigation */}
-      <List sx={{ py: 1, px: 1 }}>
+      <List sx={{ py: 1, px: isCollapsed ? 1 : 1 }}>
         <ListItem disablePadding>
-          <ListItemButton sx={{ borderRadius: 2, mb: 0.5 }}>
-            <ListItemIcon>
-              <HistoryIcon fontSize="small" />
+          <ListItemButton
+            sx={{
+              borderRadius: 2.5,
+              mb: 0.75,
+              px: isCollapsed ? 1 : 2,
+              py: isCollapsed ? 1.5 : 1,
+              justifyContent: isCollapsed ? 'center' : 'flex-start',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                backgroundColor: 'rgba(249,115,22,0.1)',
+                transform: isCollapsed ? 'scale(1.05)' : 'translateX(4px) scale(1.02)',
+                '& .MuiListItemIcon-root': {
+                  color: '#f97316',
+                  transform: 'scale(1.1) rotate(5deg)',
+                },
+                '& .MuiListItemText-primary': {
+                  color: '#f97316',
+                  fontWeight: 600,
+                }
+              }
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: isCollapsed ? 'auto' : 40,
+                justifyContent: 'center'
+              }}
+            >
+              <HistoryIcon
+                fontSize="small"
+                sx={{
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              />
             </ListItemIcon>
-            {!isCollapsed && <ListItemText primary="Recent" primaryTypographyProps={{ fontSize: '0.9rem' }} />}
+            {!isCollapsed && <ListItemText primary="Recent" primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />}
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton sx={{ borderRadius: 2 }}>
-            <ListItemIcon>
-              <SettingsIcon fontSize="small" />
+          <ListItemButton
+            sx={{
+              borderRadius: 2.5,
+              px: isCollapsed ? 1 : 2,
+              py: isCollapsed ? 1.5 : 1,
+              justifyContent: isCollapsed ? 'center' : 'flex-start',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              '&:hover': {
+                backgroundColor: 'rgba(249,115,22,0.1)',
+                transform: isCollapsed ? 'scale(1.05)' : 'translateX(4px) scale(1.02)',
+                '& .MuiListItemIcon-root': {
+                  color: '#f97316',
+                  transform: 'scale(1.1) rotate(5deg)',
+                },
+                '& .MuiListItemText-primary': {
+                  color: '#f97316',
+                  fontWeight: 600,
+                }
+              }
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: isCollapsed ? 'auto' : 40,
+                justifyContent: 'center'
+              }}
+            >
+              <SettingsIcon
+                fontSize="small"
+                sx={{
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              />
             </ListItemIcon>
-            {!isCollapsed && <ListItemText primary="Settings" primaryTypographyProps={{ fontSize: '0.9rem' }} />}
+            {!isCollapsed && <ListItemText primary="Settings" primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 500 }} />}
           </ListItemButton>
         </ListItem>
       </List>
@@ -263,17 +396,47 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Conversations List */}
       <Box sx={{ flex: 1, overflow: 'auto', py: 1 }}>
         {filteredConversations.length === 0 ? (
-          <Box sx={{ 
-            textAlign: 'center', 
-            py: 4,
-            display: isCollapsed ? 'none' : 'block'
+          <Box sx={{
+            textAlign: 'center',
+            py: 6,
+            display: isCollapsed ? 'none' : 'block',
+            px: 3
           }}>
-            <ChatIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, rgba(249,115,22,0.1) 0%, rgba(249,115,22,0.05) 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 3,
+                border: '2px solid rgba(249,115,22,0.2)',
+                transition: 'all 0.3s ease-in-out',
+                '&:hover': {
+                  transform: 'scale(1.05) rotate(10deg)',
+                  background: 'linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(249,115,22,0.08) 100%)',
+                }
+              }}
+            >
+              <ChatIcon sx={{ fontSize: 36, color: '#f97316' }} />
+            </Box>
+            <Typography variant="body2" sx={{
+              color: 'text.primary',
+              fontWeight: 600,
+              mb: 1,
+              fontSize: '0.95rem'
+            }}>
               {searchQuery ? 'No conversations found' : 'No conversations yet'}
             </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Start a new chat to begin
+            <Typography variant="caption" sx={{
+              color: 'text.secondary',
+              display: 'block',
+              lineHeight: 1.5
+            }}>
+              {searchQuery ? 'Try adjusting your search terms' : 'Click the + button to start your first conversation'}
             </Typography>
           </Box>
         ) : (
@@ -321,7 +484,18 @@ const Sidebar: React.FC<SidebarProps> = ({
                           label={conversation.model}
                           size="small"
                           variant="outlined"
-                          sx={{ fontSize: '0.7rem', height: 20 }}
+                          sx={{
+                            fontSize: '0.7rem',
+                            height: 22,
+                            fontWeight: 600,
+                            background: 'linear-gradient(135deg, rgba(249,115,22,0.1) 0%, rgba(249,115,22,0.05) 100%)',
+                            borderColor: 'rgba(249,115,22,0.3)',
+                            color: '#f97316',
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(249,115,22,0.08) 100%)',
+                              transform: 'scale(1.05)',
+                            }
+                          }}
                         />
                       )}
                     </Box>
