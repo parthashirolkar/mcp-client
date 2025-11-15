@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Box,
   Paper,
@@ -17,10 +19,15 @@ import {
   Person as UserIcon,
   Build as ToolIcon,
   CheckCircle as SuccessIcon,
-  Error as ErrorIcon
+  Error as ErrorIcon,
+  LightMode as LightModeIcon,
+  DarkMode as DarkModeIcon,
+  Menu as MenuIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
+import Sidebar from './Sidebar';
+import { useAppTheme } from '../../context/ThemeContext';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
@@ -56,12 +63,34 @@ interface Conversation {
   system_prompt: string;
 }
 
-const ChatContainer = styled(Box)(({ theme }) => ({
+const MainContainer = styled(Box)(({ theme }) => ({
+  height: '100vh',
+  display: 'flex',
+  backgroundColor: 'transparent',
+}));
+
+const ChatArea = styled(Box)(({ theme }) => ({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100vh',
+}));
+
+const ChatContainer = styled(Paper)(({ theme }) => ({
   height: '100vh',
   display: 'flex',
   flexDirection: 'column',
   backgroundColor: theme.palette.background.default,
-  position: 'relative',
+  backdropFilter: 'blur(10px)',
+  margin: theme.spacing(2),
+  borderRadius: theme.spacing(3),
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 8px 32px rgba(0,0,0,0.3)'
+    : '0 8px 32px rgba(0,0,0,0.1)',
+  border: theme.palette.mode === 'dark'
+    ? '1px solid rgba(255,255,255,0.1)'
+    : '1px solid rgba(255,255,255,0.2)',
+  overflow: 'hidden',
 }));
 
 const ChatHeader = styled(Box)(({ theme }) => ({
@@ -148,22 +177,102 @@ const MessageBubble = styled(Box, {
   padding: theme.spacing(2, 2.5),
   borderRadius: theme.spacing(2),
   background: isUser
-    ? 'linear-gradient(135deg, #0066cc 0%, #004c99 100%)'
-    : theme.palette.background.paper,
+    ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)'
+    : theme.palette.mode === 'dark'
+    ? 'linear-gradient(135deg, rgba(30,30,30,0.95) 0%, rgba(20,20,20,0.95) 100%)'
+    : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
   color: isUser
     ? '#ffffff'
-    : theme.palette.text.primary,
+    : theme.palette.mode === 'dark'
+    ? '#e5e7eb'
+    : '#1f2937',
   boxShadow: isUser
-    ? '0 4px 12px rgba(0, 102, 204, 0.15)'
+    ? '0 4px 12px rgba(249, 115, 22, 0.25)'
+    : theme.palette.mode === 'dark'
+    ? '0 2px 8px rgba(0, 0, 0, 0.3)'
     : '0 2px 8px rgba(0, 0, 0, 0.06)',
   border: isUser ? 'none' : `1px solid ${theme.palette.divider}`,
   position: 'relative',
   transition: 'all 0.2s ease',
+  backdropFilter: 'blur(10px)',
   '&:hover': {
     transform: 'translateY(-1px)',
     boxShadow: isUser
-      ? '0 6px 16px rgba(0, 102, 204, 0.2)'
+      ? '0 6px 16px rgba(249, 115, 22, 0.3)'
+      : theme.palette.mode === 'dark'
+      ? '0 4px 12px rgba(0, 0, 0, 0.4)'
       : '0 4px 12px rgba(0, 0, 0, 0.1)',
+  },
+  // Enhanced markdown styling inside bubbles
+  '& .markdown-content': {
+    color: 'inherit',
+    '& h1, h2, h3, h4, h5, h6': {
+      color: 'inherit',
+      marginTop: theme.spacing(1.5),
+      marginBottom: theme.spacing(1),
+    },
+    '& p': {
+      color: 'inherit',
+      marginBottom: theme.spacing(1),
+    },
+    '& code': {
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(255, 255, 255, 0.15)'
+        : 'rgba(0, 0, 0, 0.1)',
+      color: isUser
+        ? '#ffffff'
+        : theme.palette.mode === 'dark'
+        ? '#fbbf24'
+        : '#dc2626',
+      padding: '2px 6px',
+      borderRadius: '4px',
+      fontSize: '0.875em',
+    },
+    '& pre': {
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(0, 0, 0, 0.3)'
+        : 'rgba(0, 0, 0, 0.05)',
+      color: 'inherit',
+      padding: theme.spacing(1.5),
+      borderRadius: theme.spacing(1),
+      overflow: 'auto',
+      border: `1px solid ${theme.palette.divider}`,
+    },
+    '& table': {
+      borderCollapse: 'collapse',
+      width: '100%',
+      marginTop: theme.spacing(1),
+      marginBottom: theme.spacing(1),
+      '& th, & td': {
+        border: `1px solid ${theme.palette.divider}`,
+        padding: theme.spacing(0.75),
+        textAlign: 'left',
+        color: 'inherit',
+      },
+      '& th': {
+        backgroundColor: theme.palette.mode === 'dark'
+          ? 'rgba(255, 255, 255, 0.1)'
+          : 'rgba(0, 0, 0, 0.05)',
+        fontWeight: 600,
+        color: 'inherit',
+      },
+    },
+    '& ul, ol': {
+      color: 'inherit',
+      marginBottom: theme.spacing(1),
+      '& li': {
+        color: 'inherit',
+        marginBottom: theme.spacing(0.25),
+      },
+    },
+    '& strong': {
+      color: 'inherit',
+      fontWeight: 600,
+    },
+    '& em': {
+      color: 'inherit',
+      fontStyle: 'italic',
+    },
   },
   }));
 
@@ -177,8 +286,13 @@ const MessageTimestamp = styled(Typography)(({ theme }) => ({
 const InputContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2.5, 3),
   borderTop: `1px solid ${theme.palette.divider}`,
-  backgroundColor: theme.palette.background.paper,
-  boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.05)',
+  background: theme.palette.mode === 'dark'
+    ? `linear-gradient(180deg, ${theme.palette.background.paper} 0%, rgba(20,20,20,0.95) 100%)`
+    : `linear-gradient(180deg, ${theme.palette.background.paper} 0%, rgba(248,250,252,0.95) 100%)`,
+  backdropFilter: 'blur(10px)',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 -2px 10px rgba(0, 0, 0, 0.3)'
+    : '0 -2px 10px rgba(0, 0, 0, 0.05)',
 }));
 
 const InputWrapper = styled(Box)(({ theme }) => ({
@@ -186,6 +300,27 @@ const InputWrapper = styled(Box)(({ theme }) => ({
   gap: theme.spacing(1.5),
   alignItems: 'flex-end',
   maxWidth: '100%',
+}));
+
+const SendButton = styled(IconButton)<{ disabled?: boolean }>(({ theme, disabled }) => ({
+  width: 48,
+  height: 48,
+  borderRadius: '50%',
+  background: disabled
+    ? theme.palette.action.disabled
+    : 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+  boxShadow: disabled
+    ? 'none'
+    : '0 4px 12px rgba(249, 115, 22, 0.3)',
+  transition: 'all 0.2s ease-in-out',
+  '&:hover:not(:disabled)': {
+    background: 'linear-gradient(135deg, #ea580c 0%, #dc2626 100%)',
+    transform: 'scale(1.05)',
+    boxShadow: '0 6px 16px rgba(249, 115, 22, 0.4)',
+  },
+  '&:active:not(:disabled)': {
+    transform: 'scale(0.95)',
+  },
 }));
 
 const ToolCallChip = styled(Chip)(({ theme }) => ({
@@ -232,11 +367,19 @@ const LoadingBubble = styled(Box)(({ theme }) => ({
 
 const ChatInterface: React.FC = () => {
   const theme = useTheme();
+  const { toggleMode, isDarkMode } = useAppTheme();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Conversation management state
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+
+  // Sidebar state
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -402,19 +545,91 @@ const ChatInterface: React.FC = () => {
     </ToolResultContainer>
   );
 
+  // Conversation management handlers
+  const handleNewChat = () => {
+    initializeConversation();
+    setActiveConversationId(null);
+    setMessages([]);
+  };
+
+  const handleConversationSelect = (id: string) => {
+    setActiveConversationId(id);
+    // TODO: Load conversation messages
+    console.log('Selected conversation:', id);
+  };
+
+  const handleConversationDelete = (id: string) => {
+    setConversations(prev => prev.filter(conv => conv.id !== id));
+    if (activeConversationId === id) {
+      handleNewChat();
+    }
+  };
+
+  const handleConversationRename = (id: string, newTitle: string) => {
+    setConversations(prev => prev.map(conv =>
+      conv.id === id ? { ...conv, title: newTitle } : conv
+    ));
+  };
+
   return (
-    <ChatContainer>
+    <MainContainer>
+      <Sidebar
+        conversations={conversations}
+        activeConversationId={activeConversationId}
+        onConversationSelect={handleConversationSelect}
+        onNewChat={handleNewChat}
+        onConversationDelete={handleConversationDelete}
+        onConversationRename={handleConversationRename}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      />
+      <ChatArea>
+        <ChatContainer>
       <ChatHeader>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-              AI Agent Chat
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-              {conversation ? `Model: ${conversation.model || 'Auto-selected'}` : 'Initializing...'}
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <IconButton
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                  transform: 'scale(1.05)',
+                },
+              }}
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                AI Agent Chat
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                {conversation ? `Model: ${conversation.model || 'Auto-selected'}` : 'Initializing...'}
+              </Typography>
+            </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton
+              onClick={toggleMode}
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                  transform: 'scale(1.05)',
+                },
+              }}
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
             <Box sx={{
               width: 8,
               height: 8,
@@ -448,13 +663,70 @@ const ChatInterface: React.FC = () => {
 
             <MessageContent isUser={message.role === 'user'}>
               <MessageBubble isUser={message.role === 'user'}>
-                <Typography variant="body1" component="div" sx={{ lineHeight: 1.6 }}>
-                  {message.content.split('\n').map((paragraph, index) => (
-                    <Typography key={index} sx={{ mb: paragraph.trim() === '' ? 0 : 1 }}>
-                      {paragraph}
-                    </Typography>
-                  ))}
-                </Typography>
+                {message.role === 'user' ? (
+                  // User messages render as plain text
+                  <Typography variant="body1" component="div" sx={{ lineHeight: 1.6 }}>
+                    {message.content.split('\n').map((paragraph, index) => (
+                      <Typography key={index} sx={{ mb: paragraph.trim() === '' ? 0 : 1 }}>
+                        {paragraph}
+                      </Typography>
+                    ))}
+                  </Typography>
+                ) : (
+                  // Assistant messages render as markdown
+                  <Box className="markdown-content" sx={{
+                    '& a': {
+                      color: 'primary.main',
+                      textDecoration: 'none',
+                      '&:hover': {
+                        textDecoration: 'underline'
+                      }
+                    }
+                  }}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                      // @ts-ignore - ReactMarkdown component types
+                      p: ({children}: any) => <Typography variant="body1" component="div" sx={{ mb: 1, '&:last-child': { mb: 0 } }}>{children}</Typography>,
+                      // @ts-ignore - ReactMarkdown component types
+                      code: ({inline, children}: any) => {
+                        if (inline) {
+                          return <Box component="code" sx={{
+                            backgroundColor: 'transparent',
+                            padding: '2px 4px',
+                            borderRadius: '4px',
+                            fontFamily: 'monospace',
+                            fontSize: '0.875em'
+                          }}>{children}</Box>
+                        }
+                        return <Box component="code" sx={{
+                          display: 'block',
+                          backgroundColor: 'transparent',
+                          padding: 1,
+                          borderRadius: 1,
+                          overflow: 'auto',
+                          fontFamily: 'monospace',
+                          fontSize: '0.875em',
+                          whiteSpace: 'pre-wrap'
+                        }}>{children}</Box>
+                      },
+                      // @ts-ignore - ReactMarkdown component types
+                      pre: ({children}: any) => <Box component="pre" sx={{
+                        backgroundColor: 'transparent',
+                        padding: 0,
+                        borderRadius: 0,
+                        overflow: 'auto',
+                        mb: 1,
+                        fontFamily: 'monospace',
+                        fontSize: '0.875em',
+                        margin: 0
+                      }}>{children}</Box>
+                    }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </Box>
+                )}
 
                 {message.tool_calls && message.tool_calls.length > 0 && (
                   <Box sx={{ mt: 2, pt: 2, borderTop: `1px solid ${theme.palette.divider}` }}>
@@ -532,7 +804,7 @@ const ChatInterface: React.FC = () => {
             maxRows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder="Type your message..."
             disabled={isLoading || !conversation}
             variant="outlined"
@@ -554,37 +826,21 @@ const ChatInterface: React.FC = () => {
               },
             }}
           />
-          <IconButton
-            color="primary"
+          <SendButton
             onClick={sendMessage}
             disabled={!input.trim() || isLoading || !conversation}
-            sx={{
-              borderRadius: 2.5,
-              width: 48,
-              height: 48,
-              backgroundColor: input.trim() && !isLoading && conversation ? 'primary.main' : 'transparent',
-              color: input.trim() && !isLoading && conversation ? 'primary.contrastText' : 'action.disabled',
-              boxShadow: input.trim() && !isLoading && conversation ? '0 4px 12px rgba(0, 102, 204, 0.15)' : 'none',
-              transition: 'all 0.2s ease',
-              '&:hover': input.trim() && !isLoading && conversation ? {
-                backgroundColor: 'primary.dark',
-                transform: 'scale(1.05)',
-                boxShadow: '0 6px 16px rgba(0, 102, 204, 0.2)',
-              } : {},
-              '&:active': {
-                transform: 'scale(0.95)',
-              },
-            }}
           >
             {isLoading ? (
               <CircularProgress size={20} thickness={3} />
             ) : (
               <SendIcon />
             )}
-          </IconButton>
+          </SendButton>
         </InputWrapper>
       </InputContainer>
     </ChatContainer>
+      </ChatArea>
+    </MainContainer>
   );
 };
 
